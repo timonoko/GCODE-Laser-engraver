@@ -1,1 +1,1 @@
-Lightburn was miserable.
+Lightburn was miserable. Only €69.95 .
