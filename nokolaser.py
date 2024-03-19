@@ -15,7 +15,7 @@ while True:
             time.sleep(1)
 
 ser.baudrate = 9600
-ser.timeout = 0.1
+ser.timeout = 0.5
 ser.xonoff = True
 
 def save_status():
@@ -42,9 +42,17 @@ print(glob.glob('*.png'))
 print(glob.glob('*.jpg'))
 
 def sendaus(x):
-    print('sendaus:',x)
+    ser.timeout = 0.01
+    ser.read(40)
+    print('sendaus:',x,end=":")
     ser.write(x)
-    print('vastaus:',ser.read(40))
+    ser.timeout = 1
+    s=str(ser.read(5))
+    if "err" in s:
+        print('ERROR')
+        input('Press Enter to continue')
+    elif "ok" in s: print('OK')
+    else: print('??? ',s)
 """
 def sendaus(x):
     print('sendaus:',x)
@@ -67,7 +75,6 @@ def seis():
     global LASER_ON
     LASER_ON=False
     sendaus(b'M5\r')
-    print('vastaus:',ser.read(40))
 
 def Move_raw(x,y):
     global LASER_ON,Previous_X,Previous_Y
@@ -83,25 +90,19 @@ def Move(x,y):
         seis()
         Move_raw(x,y)
 
-
 POWER=975
 SPEED=2400
 def Laser(x,y):
     global LASER_ON,Previous_X,Previous_Y
     if not LASER_ON:
         Move_raw(Previous_X,Previous_Y)
-        sendaus(bytes("G1 S{} F{}\r".format(POWER,SPEED),encoding='UTF-8'))
+        sendaus(bytes("G1S{}F{}\r".format(POWER,SPEED),encoding='UTF-8'))
         sendaus(b'M8\r')
         sendaus(b'M3\r')
         LASER_ON=True
     Previous_X=x
     Previous_Y=y
     sendaus(bytes("G1 X{} Y{}\r".format(x,y),encoding='UTF-8'))
-
-def seis():
-    global LASER_ON
-    LASER_ON=False
-    sendaus(b'M5\r')
 
 def Frame(x,y):
     Move(0,0)
@@ -153,15 +154,18 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,hori=False):
         for y in range(h):
             for x in range(w): plot2(img,x,y,h,vali,musta)
             plot3(x,y,vali)
+            seis()
     else:
         for x in range(w):
+            seis()
             for y in range(h): plot2(img,x,y,h,vali,musta)
             plot3(x,y,vali)
+            seis()
     seis()
 
 
 def plot_circle(r=30,xo=50,yo=50):
-     step=int(r/2)
+     step=10
      for a in range(0,360+step,step):
          x=r*math.cos(math.radians(a))
          y=r*math.sin(math.radians(a))
