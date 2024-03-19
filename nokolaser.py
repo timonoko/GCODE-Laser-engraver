@@ -5,7 +5,7 @@ import serial,time,sys,math,os,datetime,glob,atexit
 ser = serial.Serial()
 
 PRINTING=False
-GFILE=13
+GFILE=""
 laskuri=5
 while laskuri>0:
     ser.port = "/dev/ttyACM0"
@@ -17,7 +17,6 @@ while laskuri>0:
             print('EI PORTTIA')
             laskuri-=1
             time.sleep(0.2)
-
 if laskuri>1:
     ser.baudrate = 9600
     ser.timeout = 0.5
@@ -30,7 +29,6 @@ else:
     PRINTING=True
     GFILE=open('gcode.gcode','w')
     GFILE.write(";from nokolaser\n")
-
     
 def save_status():
     f=open('STATUS.py','w')
@@ -194,11 +192,16 @@ def plot_circle(xo=50,yo=50,r=30,start=0,end=360):
          else:
              Laser(xo+x,yo+y)
 
-def paperi():
+def paperin_poltto():
     global POWER,SPEED
     POWER=500
     SPEED=1000
 
+def paperin_leikkuu():
+    global POWER,SPEED
+    POWER=975
+    SPEED=2400
+    
 def banneri(text,w,h=50,vali=0.5):
     l=len(text)
     huu=h
