@@ -157,7 +157,6 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,hori=False):
             seis()
     else:
         for x in range(w):
-            seis()
             for y in range(h): plot2(img,x,y,h,vali,musta)
             plot3(x,y,vali)
             seis()
