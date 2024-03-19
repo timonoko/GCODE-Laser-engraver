@@ -4,7 +4,10 @@ from PIL import Image, ImageFont, ImageDraw
 import serial,time,sys,math,os,datetime,glob
 ser = serial.Serial()
 
-while True:
+PRINTING=False
+GFILE=13
+laskuri=5
+while laskuri>0:
     ser.port = "/dev/ttyACM0"
     try: ser.open() ; break
     except:
@@ -12,12 +15,23 @@ while True:
         try: ser.open() ; break
         except:
             print('EI PORTTIA')
-            time.sleep(1)
+            laskuri-=1
+            time.sleep(0.5)
 
-ser.baudrate = 9600
-ser.timeout = 0.5
-ser.xonoff = True
+if laskuri>1:
+    ser.baudrate = 9600
+    ser.timeout = 0.5
+    ser.xonoff = True
+    PRINTING=False
+else:
+    print("")
+    print("No Laser, printing to file gcode.gcode")
+    print("")
+    PRINTING=True
+    GFILE=open('gcode.gcode','w')
+    GFILE.write(";from nokolaser\n")
 
+    
 def save_status():
     f=open('STATUS.py','w')
     f.write('X_NOW='+str(X_NOW)+';Y_NOW='+str(Y_NOW))
@@ -42,17 +56,26 @@ print(glob.glob('*.png'))
 print(glob.glob('*.jpg'))
 
 def sendaus(x):
-    ser.timeout = 0.01
-    ser.read(40)
-    print('sendaus:',x,end=":")
-    ser.write(x)
-    ser.timeout = 1
-    s=str(ser.read(5))
-    if "err" in s:
-        print('ERROR')
-        input('Press Enter to continue')
-    elif "ok" in s: print('OK')
-    else: print('??? ',s)
+    if not PRINTING:
+        ser.timeout = 0.01
+        ser.read(40)
+        print('sendaus:',x.decode("utf-8"),end=":")
+        ser.write(x)
+        ser.timeout = 1
+        s=str(ser.read(5))
+        if "err" in s:
+            print('ERROR')
+            input('Press Enter to continue')
+        elif "ok" in s: print('OK')
+        else: print('??? ',s)
+    else:
+        print('gcode:',x.decode("utf-8"))
+        GFILE.write(x.decode("utf-8").replace("\r","\n"))
+
+def loppu():
+    seis()
+    if PRINTING:   GFILE.close()
+        
 """
 def sendaus(x):
     print('sendaus:',x)
@@ -110,7 +133,7 @@ def Frame(x,y):
     Laser(x,y)
     Laser(0,y)
     Laser(0,0)
-    seis()
+    loppu()
 
 Polttoa=False    
 def plot2(img,x,y,h,vali,musta):
@@ -136,8 +159,7 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,hori=False):
     if type(i) == type('string'): img=Image.open(i)
     else: img=i
     if w>0:
-        if h>0:
-            img=img.resize((w,h))
+        if h>0: img=img.resize((w,h))
         else:
             s=img.size
             h=int(s[1]/(s[0]/w))
@@ -160,19 +182,19 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,hori=False):
             for y in range(h): plot2(img,x,y,h,vali,musta)
             plot3(x,y,vali)
             seis()
-    seis()
 
 
 def plot_circle(r=30,xo=50,yo=50):
-     step=10
-     for a in range(0,360+step,step):
+    step=10
+    for a in range(0,360+step,step):
          x=r*math.cos(math.radians(a))
          y=r*math.sin(math.radians(a))
          if a==0:
              Move(xo+x,yo+y)
          else:
              Laser(xo+x,yo+y)
-     seis()        
+    loppu()
+
 
 def paperi():
     global POWER,SPEED
@@ -188,6 +210,7 @@ def banneri(text,w,h=50,vali=0.5):
     draw.text((10,-int(huu/5)), text, font = font, fill='black', align ="left")  
     plot_image(image,w,hori=True,vali=vali)
     Move_raw(0,0)
+    loppu()
     
 
     
