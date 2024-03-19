@@ -1,4 +1,4 @@
-#! /usr/bin(/Python3
+#! /usr/bin/Python3
 
 from PIL import Image, ImageFont, ImageDraw  
 import serial,time,sys,math,os,datetime,glob
