@@ -1,7 +1,7 @@
 #! /usr/bin/Python3
 
 from PIL import Image, ImageFont, ImageDraw  
-import serial,time,sys,math,os,datetime,glob
+import serial,time,sys,math,os,datetime,glob,atexit
 ser = serial.Serial()
 
 PRINTING=False
@@ -16,7 +16,7 @@ while laskuri>0:
         except:
             print('EI PORTTIA')
             laskuri-=1
-            time.sleep(0.5)
+            time.sleep(0.2)
 
 if laskuri>1:
     ser.baudrate = 9600
@@ -74,13 +74,13 @@ def sendaus(x):
 
 def loppu():
     seis()
-    if PRINTING:   GFILE.close()
-        
-"""
-def sendaus(x):
-    print('sendaus:',x)
-    time.sleep(0.5)
-"""    
+    if PRINTING:
+        GFILE.write("; Loppu\n")
+        GFILE.close()
+    print('Hyvasti')
+atexit.register(loppu)
+
+       
 sendaus(b'G00\r')
 sendaus(b'G17\r')
 sendaus(b'G40\r')
@@ -96,8 +96,9 @@ Previous_Y=0
 
 def seis():
     global LASER_ON
-    LASER_ON=False
-    sendaus(b'M5\r')
+    if LASER_ON or not PRINTING:
+        LASER_ON=False
+        sendaus(b'M5\r')
 
 def Move_raw(x,y):
     global LASER_ON,Previous_X,Previous_Y
@@ -133,7 +134,6 @@ def Frame(x,y):
     Laser(x,y)
     Laser(0,y)
     Laser(0,0)
-    loppu()
 
 Polttoa=False    
 def plot2(img,x,y,h,vali,musta):
@@ -184,17 +184,15 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,hori=False):
             seis()
 
 
-def plot_circle(r=30,xo=50,yo=50):
+def plot_circle(xo=50,yo=50,r=30,start=0,end=360):
     step=10
-    for a in range(0,360+step,step):
+    for a in range(start,end+step,step):
          x=r*math.cos(math.radians(a))
          y=r*math.sin(math.radians(a))
-         if a==0:
+         if a==start:
              Move(xo+x,yo+y)
          else:
              Laser(xo+x,yo+y)
-    loppu()
-
 
 def paperi():
     global POWER,SPEED
@@ -210,7 +208,21 @@ def banneri(text,w,h=50,vali=0.5):
     draw.text((10,-int(huu/5)), text, font = font, fill='black', align ="left")  
     plot_image(image,w,hori=True,vali=vali)
     Move_raw(0,0)
-    loppu()
+
+def curved_box(x,y,r):
+    plot_circle(r,r,r,180,270)
+    Move(0+r,0)
+    Laser(x-r,0)
+    plot_circle(x-r,r,r,270,360)
+    Move(x,r)
+    Laser(x,y-r)
+    plot_circle(x-r,y-r,r,0,90)
+    Move(x-r,y)
+    Laser(r,y)
+    plot_circle(r,y-r,r,90,180)
+    Move(0,y-r)
+    Laser(0,r)
+
     
 
     
