@@ -6,7 +6,9 @@ ser = serial.Serial()
 
 PRINTING=False
 GFILE=""
-laskuri=5
+try:
+    if sys.argv[1]=='con':laskuri=5
+except: laskuri=0
 while laskuri>0:
     ser.port = "/dev/ttyACM0"
     try: ser.open() ; break
@@ -114,11 +116,11 @@ def Move(x,y):
 
 POWER=975
 SPEED=2400
-def Laser(x,y):
+def Laser(x,y,power=POWER,speed=SPEED):
     global LASER_ON,Previous_X,Previous_Y
     if not LASER_ON:
         Move_raw(Previous_X,Previous_Y)
-        sendaus(bytes("G1S{}F{}\r".format(POWER,SPEED),encoding='UTF-8'))
+        sendaus(bytes("G1S{}F{}\r".format(power,speed),encoding='UTF-8'))
         sendaus(b'M8\r')
         sendaus(b'M3\r')
         LASER_ON=True
