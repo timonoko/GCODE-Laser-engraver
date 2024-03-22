@@ -6,9 +6,10 @@ ser = serial.Serial()
 
 PRINTING=False
 GFILE=""
+laskuri=0
 try:
     if sys.argv[1]=='con':laskuri=5
-except: laskuri=0
+except: pass
 while laskuri>0:
     ser.port = "/dev/ttyACM0"
     try: ser.open() ; break
@@ -29,19 +30,20 @@ else:
     print("No Laser, printing to file gcode.gcode")
     print("")
     PRINTING=True
-    GFILE=open('gcode.gcode','w')
+    try:   GFILE=open(sys.argv[1],'w')
+    except: GFILE=open('gcode.gcode','w')
     GFILE.write(";from nokolaser\n")
     
 def save_status():
-    f=open('STATUS.py','w')
+    f=open('STASI.py','w')
     f.write('X_NOW='+str(X_NOW)+';Y_NOW='+str(Y_NOW))
     f.close()
             
 X_NOW=0
 Y_NOW=0
-if not os.path.exists('STATUS.py'): save_status()
-from STATUS import *
-file_mod_time=datetime.datetime.fromtimestamp(os.path.getmtime('STATUS.py'))
+if not os.path.exists('STASI.py'): save_status()
+from STASI import *
+file_mod_time=datetime.datetime.fromtimestamp(os.path.getmtime('STASI.py'))
 today=datetime.datetime.today()
 age=today-file_mod_time
 print('Welcome back after',age.seconds,'seconds')
@@ -116,8 +118,10 @@ def Move(x,y):
 
 POWER=975
 SPEED=2400
-def Laser(x,y,power=POWER,speed=SPEED):
+def Laser(x,y):
     global LASER_ON,Previous_X,Previous_Y
+    power=POWER
+    speed=SPEED
     if not LASER_ON:
         Move_raw(Previous_X,Previous_Y)
         sendaus(bytes("G1S{}F{}\r".format(power,speed),encoding='UTF-8'))
@@ -153,7 +157,8 @@ def plot3(x,y,vali):
         Laser(x*vali,y*vali)
         Polttoa=False
 
-def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,hori=False):
+def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,
+               hori=False):
     Move_raw(0,0)
     w=int(mm/vali)
     if type(i) == type('string'): img=Image.open(i)
