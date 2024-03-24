@@ -199,7 +199,7 @@ def plot_photo(i,mm,grad=8,vali=0.8):
     if vali=="laser": vali=0.8
     if vali=="plotter": vali=2
     for darkness in range(grad):
-        POWER=int(200+800/grad*(darkness+1))
+        POWER=int(200+600/grad*(darkness+1))
         musta=int(255-255/(grad+1)*(darkness+1))
         if darkness%2==0:
             hori=True
