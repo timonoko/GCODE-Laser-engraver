@@ -26,12 +26,15 @@ if laskuri>1:
     ser.xonoff = True
     PRINTING=False
 else:
-    print("")
-    print("No Laser, printing to file gcode.gcode")
-    print("")
     PRINTING=True
-    try:   GFILE=open(sys.argv[1],'w')
-    except: GFILE=open('gcode.gcode','w')
+    try:
+        name=sys.argv[1]
+    except:
+        name='gcode.gcode'
+    GFILE=open(name,'w')
+    print("")
+    print("No Laser, printing to file",name)
+    print("")
     GFILE.write(";from nokolaser\n")
     
 def save_status():
@@ -160,7 +163,7 @@ def plot3(x,y,vali):
         Polttoa=False
 
 def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,
-               hori=False):
+               hori=False,sure=False):
     Move_raw(0,0)
     w=int(mm/vali)
     if type(i) == type('string'): img=Image.open(i)
@@ -175,9 +178,10 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,
         s=img.size
         w=s[0]
         h=s[1]
-    print('New Size:',w,',',h," cm:",w*vali/10,',',h*vali/10)
-    img.show()
-    input('Enter to continue')
+    if not sure:
+        print('New Size:',w,',',h," cm:",w*vali/10,',',h*vali/10)
+        img.show()
+        input('Enter to continue')
     if kehys: Frame(w*vali,h*vali)
     if hori:
         for y in range(h):
@@ -190,6 +194,22 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,
             plot3(x,y,vali)
             seis()
 
+def plot_photo(i,mm,grad=8,vali=0.8):
+    global POWER,GLOBAL_X,GLOBAL_Y
+    if vali=="laser": vali=0.8
+    if vali=="plotter": vali=2
+    for darkness in range(grad):
+        POWER=int(200+800/grad*(darkness+1))
+        musta=int(255-255/(grad+1)*(darkness+1))
+        if darkness%2==0:
+            hori=True
+            GLOBAL_Y+=2*vali/grad
+        else:
+            hori=False
+            GLOBAL_X+=2*vali/grad
+        print('POWER musta=',POWER,musta,hori)
+        plot_image(i,mm,sure=True,musta=musta,hori=hori,vali=vali)
+    
 
 def plot_circle(xo=50,yo=50,r=30,start=0,end=360):
     step=10
