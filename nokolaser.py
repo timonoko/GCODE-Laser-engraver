@@ -1,5 +1,9 @@
 #! /usr/bin/Python3
 
+# nokolaser = output to "gcode.gcode"
+# nokolaser send = send "gcode.gcode" to laser
+# nokolaser con = output directly to laser
+
 from PIL import Image, ImageFont, ImageDraw  
 import serial,time,sys,math,os,datetime,glob,atexit
 ser = serial.Serial()
