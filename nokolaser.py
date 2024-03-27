@@ -10,6 +10,9 @@ laskuri=0
 try:
     if sys.argv[1]=='con':laskuri=5
 except: pass
+try:
+    if sys.argv[1]=='send':laskuri=5
+except: pass
 while laskuri>0:
     ser.port = "/dev/ttyACM0"
     try: ser.open() ; break
@@ -68,6 +71,7 @@ def sendaus(x):
         ser.write(x)
         ser.timeout = 1
         s=str(ser.read(5))
+        print()
         if "err" in s:
             print('ERROR')
             input('Press Enter to continue')
@@ -77,6 +81,7 @@ def sendaus(x):
         print('gcode:',x.decode("utf-8"))
         GFILE.write(x.decode("utf-8").replace("\r","\n"))
 
+   
 def loppu():
     seis()
     if PRINTING:
@@ -265,5 +270,19 @@ def curved_box(x,y,r):
     plot_circle(r,y-r,r,90,180)
     Move(0,y-r)
     Laser(0,r)
-
     
+def filesendaus(x):
+    if not PRINTING:
+        f=open(x,"r")
+        while True:
+            y=f.readline()
+            if not y : break
+            sendaus(bytes(y,encoding='UTF-8'))
+        f.close()
+if not PRINTING:
+    if sys.argv[1]=='send':
+        try:f=sys.argv[2]
+        except: f='gcode.gcode'
+        print('SENDING:',f)
+        time.sleep(10)
+        filesendaus(f)
