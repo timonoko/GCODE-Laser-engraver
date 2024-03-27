@@ -137,6 +137,12 @@ def Laser(x,y):
     Previous_Y=y
     sendaus(bytes("G1 X{} Y{}\r".format(x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
 
+
+def sleep(seconds):
+    sendaus(b'M5\r')
+    sendaus(bytes("G4 P{}\r".format(seconds),encoding='UTF-8')) #Plotterissa G4-virhe
+    if not PRINTING: time.sleep(seconds)
+    
 def Frame(x,y):
     Move(0,0)
     Laser(x,0)
@@ -149,7 +155,7 @@ def plot2(img,x,y,h,vali,musta):
     global Polttoa
     p=img.getpixel((x,h-y-1))
     v=(p[0]+p[1]+p[2])/3
-    if p[0]<musta:
+    if v<musta:
         if not Polttoa:
             Move(x*vali,y*vali)
             Polttoa=True
@@ -164,6 +170,7 @@ def plot3(x,y,vali):
 
 def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,
                hori=False,sure=False):
+    global POWER,SPEED
     Move_raw(0,0)
     w=int(mm/vali)
     if type(i) == type('string'): img=Image.open(i)
@@ -182,7 +189,12 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,
         print('New Size:',w,',',h," cm:",w*vali/10,',',h*vali/10)
         img.show()
         input('Enter to continue')
-    if kehys: Frame(w*vali,h*vali)
+    if kehys:
+        jemma=POWER,SPEED
+        POWER,SPEED=10,6000
+        Frame(w*vali,h*vali)
+        POWER,SPEED=jemma
+        sleep(10)
     if hori:
         for y in range(h):
             for x in range(w): plot2(img,x,y,h,vali,musta)
@@ -207,7 +219,6 @@ def plot_photo(i,mm,grad=8,vali=0.8):
         else:
             hori=False
             GLOBAL_X+=2*vali/grad
-        print('POWER musta=',POWER,musta,hori)
         plot_image(i,mm,sure=True,musta=musta,hori=hori,vali=vali)
     
 
@@ -254,7 +265,5 @@ def curved_box(x,y,r):
     plot_circle(r,y-r,r,90,180)
     Move(0,y-r)
     Laser(0,r)
-
-    
 
     
