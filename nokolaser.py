@@ -291,5 +291,5 @@ if not PRINTING:
         print('SENDING:',f)
         time.sleep(10)
         filesendaus(f)
-        time.sleep(10)
-        sys.exit()
+
+
