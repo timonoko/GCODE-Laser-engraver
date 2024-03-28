@@ -1,4 +1,4 @@
-#! /usr/bin/Python3
+#! /usr/bin/python3
 
 # nokolaser = output to "gcode.gcode"
 # nokolaser send = send "gcode.gcode" to laser
