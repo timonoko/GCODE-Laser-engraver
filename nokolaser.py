@@ -120,7 +120,8 @@ def Move_raw(x,y):
     global LASER_ON,Previous_X,Previous_Y
     Previous_X=x
     Previous_Y=y
-    sendaus(bytes("G0 X{} Y{}\r".format(x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
+#    sendaus(bytes("G0 X{} Y{}\r".format(x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
+    sendaus(bytes("G0 X{:.3f} Y{:.3f}\r".format(x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
 
 def Move(x,y):
     global LASER_ON,Previous_X,Previous_Y
@@ -144,7 +145,7 @@ def Laser(x,y):
         LASER_ON=True
     Previous_X=x
     Previous_Y=y
-    sendaus(bytes("G1 X{} Y{}\r".format(x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
+    sendaus(bytes("G1 X{:.3f} Y{:.3f}\r".format(x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
 
 
 def sleep(seconds):
@@ -290,3 +291,5 @@ if not PRINTING:
         print('SENDING:',f)
         time.sleep(10)
         filesendaus(f)
+        time.sleep(10)
+        sys.exit()
