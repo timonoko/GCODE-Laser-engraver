@@ -216,7 +216,7 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,
             plot3(x,y,vali)
             seis()
 
-def plot_photo(i,mm,grad=8,vali=0.8):
+def plot_photo(i,mm,grad=8,vali=0.8,kehys=False):
     global POWER,GLOBAL_X,GLOBAL_Y
     if vali=="laser": vali=0.8
     if vali=="plotter": vali=2
@@ -229,8 +229,8 @@ def plot_photo(i,mm,grad=8,vali=0.8):
         else:
             hori=False
             GLOBAL_X+=2*vali/grad
-        plot_image(i,mm,sure=True,musta=musta,hori=hori,vali=vali)
-    
+        plot_image(i,mm,sure=True,musta=musta,hori=hori,vali=vali,kehys=kehys)
+        kehys=False
 
 def plot_circle(xo=50,yo=50,r=30,start=0,end=360):
     step=10
