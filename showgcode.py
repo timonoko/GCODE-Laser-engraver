@@ -12,11 +12,12 @@ def parsee(s):
     number=""
     prevalfa="kakka"
     while i<len(s):
-        if ord(s[i]) in range(ord('0'),ord('9')+1) or s[i]=='.':
+        if s[i]=="(": break
+        elif ord(s[i]) in range(ord('0'),ord('9')+1) or s[i]=='.':
             number+=s[i]
         else:
             if prevalfa != "kakka" and number != "":
-                tulos.update({prevalfa:eval(number)})
+                tulos.update({prevalfa:float(number)})
                 number=""
             if ord(s[i]) in range(ord('A'),ord('Z')+1):
                 prevalfa=s[i]
@@ -46,8 +47,10 @@ def mydraw(x1,y1,x2,y2,color=(0,0,0)):
 
 def Move2(s):
     global IMG,MAX_X,MAX_Y,PREV_X,PREV_Y
-    x=int(10*s['X'])
-    y=int(10*s['Y'])
+    try: x=int(10*s['X'])
+    except: x=PREV_X
+    try: y=int(10*s['Y'])
+    except: y=PREV_Y
     if x>MAX_X: MAX_X=x
     if y>MAX_Y: MAX_Y=y
     if PEN_DOWN:
@@ -61,12 +64,17 @@ except: F=open('gcode.gcode','r')
 k=F.readline()
 while k:
     k=F.readline()
+    print(k)
     s=parsee(k)
     if 'G' in s:
         if s['G']==0:
-            if 'X' in s: Move2(s) 
-        elif s['G']==1:
-            if 'X' in s: Move2(s) 
+            Move2(s)
+            if 'Z' in s and s['Z']>1:
+                PEN_DOWN=False
+        elif s['G']<4:
+            if 'Z' in s and s['Z']<1:
+                PEN_DOWN=True
+            Move2(s) 
             if 'S' in s: pass #print('power',s['S'])
             if 'F' in s: pass #print('Speed',s['F'])
         elif s['G']==4:
@@ -74,10 +82,11 @@ while k:
     elif 'M' in s:
         if s['M']==3:
             PEN_DOWN=True
+        if s['M']==4:
+            PEN_DOWN=True
         if s['M']==5:
             PEN_DOWN=False
            
-print('MAX',MAX_X,MAX_Y)
 IMG=IMG.crop((0,0,MAX_X+10,MAX_Y+10))
 
 for x in range(0,MAX_X,100):
@@ -88,6 +97,8 @@ for y in range(0,MAX_Y,100):
     if y%1000==0: mydraw(0,y,MAX_X,y,(255,0,0))
 
 IMG=ImageOps.flip(IMG)
-if MAX_X>MAX_Y: IMG=IMG.resize((1600,int(1600/MAX_X*MAX_Y)))
-else: IMG=IMG.resize((int(1000/MAX_Y*MAX_X),1000))
+if IMG.size[0] >1600: IMG=IMG.resize((1600,int(1600./MAX_X*MAX_Y)))
+if IMG.size[1] >1000: IMG=IMG.resize((int(1000./MAX_Y*MAX_X),1000))
 IMG.show()
+print('MAX',MAX_X,MAX_Y)
+print(IMG.size)
