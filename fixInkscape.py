@@ -9,8 +9,10 @@ import time,sys
 try:   F=open(sys.argv[1],'r')
 except: F=open('gcode.gcode','r')
 
-POWER=975
-SPEED=2400
+try: POWER=sys.argv[2]    
+except: POWER=975
+try: SPEED=sys.argv[3]    
+except: SPEED=2400
   
 print(';Z removed, M3 and M5 added')
 s=1
@@ -36,5 +38,7 @@ while s:
         s=s.replace('Z-0.125000','')
     s=s.replace('G02','G1')
     s=s.replace('G03','G1')
+    s=s.replace('G2 ','G1 ')
+    s=s.replace('G3 ','G1 ')
     print(s)
 
