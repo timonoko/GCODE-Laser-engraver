@@ -1,8 +1,16 @@
 #! /usr/bin/python3
 
-# Removing F(speed) and adding your own F
-# Replacing Z-movement with M3 and M5
-# Replacing G2 and G3 with G1 -- just remove arcs in Inkscape.
+"""
+ This laserizes the "Path to Gcode" in Inkscape
+
+ usage:
+   fixInkscape filename laserpower laserspeed idlespeed
+
+ Removes F(speed) and adds your own F
+ Replaces Z-movement with M3 and M5
+ Replaces G2 and G3 arcs with G1 lines
+  -- just make impossible long arc radiuses in Inkscape.
+"""
 
 import time,sys
 
