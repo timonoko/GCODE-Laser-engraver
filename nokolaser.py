@@ -70,17 +70,27 @@ print(glob.glob('*.jpg'))
 def sendaus(x):
     if not PRINTING:
         ser.timeout = 0.01
-        ser.read(40)
-        print('sendaus:',x.decode("utf-8"),end=":")
+        iik=str(ser.read(40))
+        if 'ok' in iik:
+            time.sleep(1)
+            print('Ylijäämä=',iik)
+        if len(x)>1: print('sendaus:',x.decode("utf-8")[:-1])
         ser.write(x)
         ser.timeout = 1
         s=str(ser.read(5))
-        print()
         if "err" in s:
             print('ERROR')
             input('Press Enter to continue')
-        elif "ok" in s: print('OK')
-        else: print('??? ',s)
+        elif "ok" in s: pass
+        elif len(s) < 5:
+            print('WAIT',end="")
+            while len(s) < 5:
+                time.sleep(0.5)
+                s=str(ser.read(5))
+                print('.',end="")
+            print()
+        else:
+            print('??? ',s)
     else:
         print('gcode:',x.decode("utf-8"))
         GFILE.write(x.decode("utf-8").replace("\r","\n"))
@@ -283,6 +293,7 @@ def filesendaus(x):
             y=f.readline()
             if not y : break
             sendaus(bytes(y,encoding='UTF-8'))
+            time.sleep(0.01)
         f.close()
 if not PRINTING:
     if sys.argv[1]=='send':

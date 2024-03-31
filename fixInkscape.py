@@ -13,6 +13,8 @@ try: POWER=sys.argv[2]
 except: POWER=975
 try: SPEED=sys.argv[3]    
 except: SPEED=2400
+try: FSPEED=sys.argv[4]    
+except: FSPEED=2400
   
 print(';Z removed, M3 and M5 added')
 s=1
@@ -28,6 +30,7 @@ while s:
     if s.find('Z')>0:
         if s[s.find('Z')+1]=='5':
             print('M5')
+            print('G0F{}'.format(FSPEED))
             done=True
         elif done:
             done=False

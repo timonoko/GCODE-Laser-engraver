@@ -78,6 +78,7 @@ while k:
             if 'S' in s: pass #print('power',s['S'])
             if 'F' in s: pass #print('Speed',s['F'])
         elif s['G']==4:
+            print('täällä on pauseja')
             time.sleep(s['P'])
     elif 'M' in s:
         if s['M']==3:
