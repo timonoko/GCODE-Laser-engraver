@@ -97,7 +97,7 @@ def sendaus(x):
 
    
 def loppu():
-    seis()
+    stop_laser()
     if PRINTING:
         GFILE.write("; Loppu\n")
         GFILE.close()
@@ -105,20 +105,13 @@ def loppu():
 atexit.register(loppu)
 
        
-sendaus(b'G00\r')
-sendaus(b'G17\r')
-sendaus(b'G40\r')
-sendaus(b'G21\r')
-sendaus(b'G54\r')
-sendaus(b'G90\r')
-sendaus(b'M8\r')
-sendaus(b'M5\r')
+sendaus(b'G00\rG17\rG40\rG21\rG54\rG90\rM8\rM5\r')
 
 LASER_ON=False
 Previous_X=0    
 Previous_Y=0    
 
-def seis():
+def stop_laser():
     global LASER_ON
     if LASER_ON or not PRINTING:
         LASER_ON=False
@@ -126,19 +119,23 @@ def seis():
 
 GLOBAL_X=0
 GLOBAL_Y=0
-def Move_raw(x,y):
-    global LASER_ON,Previous_X,Previous_Y
+
+def rawraw(g,x,y):
+    global Previous_X,Previous_Y
+    sendaus(bytes("{} X{:.3f} Y{:.3f}\r".format(g,x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
     Previous_X=x
     Previous_Y=y
-#    sendaus(bytes("G0 X{} Y{}\r".format(x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
-    sendaus(bytes("G0 X{:.3f} Y{:.3f}\r".format(x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
+
+def Move_raw(x,y):
+    sendaus(bytes("G0 F2400\r",encoding='UTF-8'))
+    rawraw('G0',x,y)
 
 def Move(x,y):
     global LASER_ON,Previous_X,Previous_Y
     Previous_X=x
     Previous_Y=y
     if LASER_ON:
-        seis()
+        stop_laser()
         Move_raw(x,y)
 
 POWER=975
@@ -149,14 +146,11 @@ def Laser(x,y):
     speed=SPEED
     if not LASER_ON:
         Move_raw(Previous_X,Previous_Y)
-        sendaus(bytes("G1S{}F{}\r".format(power,speed),encoding='UTF-8'))
+        sendaus(bytes("G1 S{} F{}\r".format(power,speed),encoding='UTF-8'))
         sendaus(b'M8\r')
         sendaus(b'M3\r')
         LASER_ON=True
-    Previous_X=x
-    Previous_Y=y
-    sendaus(bytes("G1 X{:.3f} Y{:.3f}\r".format(x+GLOBAL_X,y+GLOBAL_Y),encoding='UTF-8'))
-
+    rawraw('G1',x,y)
 
 def sleep(seconds):
     sendaus(b'M5\r')
@@ -219,12 +213,12 @@ def plot_image(i,mm=0,h=0,vali=0.5,musta=130,kehys=False,
         for y in range(h):
             for x in range(w): plot2(img,x,y,h,vali,musta)
             plot3(x,y,vali)
-            seis()
+            stop_laser()
     else:
         for x in range(w):
             for y in range(h): plot2(img,x,y,h,vali,musta)
             plot3(x,y,vali)
-            seis()
+            stop_laser()
 
 def plot_photo(i,mm,grad=8,vali=0.8,kehys=False):
     global POWER,GLOBAL_X,GLOBAL_Y
