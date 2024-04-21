@@ -236,8 +236,8 @@ def plot_photo(i,mm,grad=8,vali=0.8,kehys=False):
         plot_image(i,mm,sure=True,musta=musta,hori=hori,vali=vali,kehys=kehys)
         kehys=False
 
-def plot_circle(xo=50,yo=50,r=30,start=0,end=360):
-    step=10
+def plot_circle(xo=50,yo=50,r=30,start=0,end=360,step=10):
+    if start>end: step=-step
     for a in range(start,end+step,step):
          x=r*math.cos(math.radians(a))
          y=r*math.sin(math.radians(a))
