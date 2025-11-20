@@ -10,13 +10,13 @@ ser = serial.Serial()
 
 PRINTING=False
 GFILE=""
-laskuri=0
-try:
-    if sys.argv[1]=='con':laskuri=5
-except: pass
-try:
-    if sys.argv[1]=='send':laskuri=5
-except: pass
+laskuri=2000
+if len(sys.argv)==1: os._exit(0)
+if sys.argv[1]=='con':laskuri=1000
+if sys.argv[1]=='send':laskuri=1000
+if sys.argv[1]=='gen':laskuri=0
+if laskuri==2000: os._exit(0)
+    
 while laskuri>0:
     ser.port = "/dev/ttyACM0"
     try: ser.open() ; break
@@ -26,7 +26,7 @@ while laskuri>0:
         except:
             print('EI PORTTIA')
             laskuri-=1
-            time.sleep(0.2)
+            time.sleep(1)
 if laskuri>1:
     ser.baudrate = 9600
     ser.timeout = 0.5
@@ -35,7 +35,7 @@ if laskuri>1:
 else:
     PRINTING=True
     try:
-        name=sys.argv[1]
+        name=sys.argv[2]
     except:
         name='gcode.gcode'
     GFILE=open(name,'w')
@@ -104,7 +104,7 @@ def loppu():
 atexit.register(loppu)
 
        
-sendaus(b'G00\rG17\rG40\rG21\rG54\rG90\rM8\rM5\r')
+sendaus(b'G00\rG17\rG40\rG21;all units are in mm\rG54\rG90\rM8\rM5\r')
 
 LASER_ON=False
 Previous_X=0    
